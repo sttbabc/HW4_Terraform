@@ -1,41 +1,41 @@
 provider "aws" {
-  region = "your_region"
+  region = "us-east-1"
 }
 
-# Define VPC
+# VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
 }
 
-# Define public and private subnets in two availability zones
+# Subnets and availability zones
 resource "aws_subnet" "public_subnet_az1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.1.0/24"
-  availability_zone = "your_az1"
+  availability_zone = "us-east-1a"
 }
 
 resource "aws_subnet" "private_subnet_az1" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.2.0/24"
-  availability_zone = "your_az1"
+  availability_zone = "us-east-1a"
 }
 
 resource "aws_subnet" "public_subnet_az2" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.3.0/24"
-  availability_zone = "your_az2"
+  availability_zone = "us-east-1b"
 }
 
 resource "aws_subnet" "private_subnet_az2" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.4.0/24"
-  availability_zone = "your_az2"
+  availability_zone = "us-east-1b"
 }
 
-# EC2 Instances
+# EC2
 resource "aws_instance" "ec2_instance1" {
   count         = 1
-  ami           = "your_ami_id"
+  ami           = "ami-0adce394ac88ca939"
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.public_subnet_az1.id
   tags = {
@@ -45,7 +45,7 @@ resource "aws_instance" "ec2_instance1" {
 
 resource "aws_instance" "ec2_instance2" {
   count         = 1
-  ami           = "your_ami_id"
+  ami           = "ami-0adce394ac88ca939"
   instance_type = "t2.micro"
   subnet_id     = aws_subnet.public_subnet_az2.id
   tags = {
@@ -61,8 +61,8 @@ resource "aws_db_instance" "example" {
   instance_class       = "db.t2.micro"
   name                 = "mydb"
   username             = "admin"
-  password             = "your_password"
-  subnet_group_name    = "mydb-subnet-group"
+  password             = "Pa55w0rd!!"
+  subnet_group_name    = "db-subnet-group"
   vpc_security_group_ids = [aws_security_group.web_servers.id]
 
   tags = {
@@ -89,7 +89,7 @@ resource "aws_security_group" "web_servers" {
   }
 }
 
-# Security Group for RDS
+# RDS Security Group
 resource "aws_security_group" "rds_instance" {
   vpc_id = aws_vpc.main.id
 
@@ -99,17 +99,4 @@ resource "aws_security_group" "rds_instance" {
     protocol        = "tcp"
     security_groups = [aws_security_group.web_servers.id]
   }
-}
-
-# Outputs
-output "ec2_instance1_public_ip" {
-  value = aws_instance.ec2_instance1.*.public_ip
-}
-
-output "ec2_instance2_public_ip" {
-  value = aws_instance.ec2_instance2.*.public_ip
-}
-
-output "rds_endpoint" {
-  value = aws_db_instance.example.endpoint
 }
